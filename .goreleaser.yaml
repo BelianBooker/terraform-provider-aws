@@ -1,0 +1,49 @@
+project_name: terraform-provider-envsend
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: envsend
+    main: .
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    env:
+      - CGO_ENABLED=0
+
+archives:
+  - id: release
+    format: zip
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
+    builds:
+      - envsend
+
+signs:
+  - id: default
+    cmd: gpg
+    args:
+      - "--batch"
+      - "--yes"
+      - "--pinentry-mode"
+      - "loopback"
+      - "--passphrase"
+      - "{{ .Env.GPG_PASSPHRASE }}"
+      - "--armor"
+      - "--detach-sign"
+      - "--output"
+      - "${signature}"
+      - "${artifact}"
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+
+release:
+  github:
+    owner: <YOUR_GITHUB_USERNAME_OR_ORG>
+    name: terraform-provider-envsend
