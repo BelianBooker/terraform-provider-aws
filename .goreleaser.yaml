@@ -7,7 +7,8 @@ before:
     - go mod tidy
 
 builds:
-  - id: aws
+  - id: terraform-provider-aws
+    binary: terraform-provider-aws
     main: .
     goos:
       - linux
@@ -16,33 +17,31 @@ builds:
     goarch:
       - amd64
       - arm64
-    env:
-      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
 
 archives:
-  - format: zip
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
-    builds:
-      - aws
+  - id: plugin-archives
+    format: zip
+    name_template: "terraform-provider-aws_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - none*
 
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
+  name_template: "terraform-provider-aws_{{ .Version }}_SHA256SUMS"
 
-signs:
-  - cmd: gpg
-    args:
-      - "--batch"
-      - "--yes"
-      - "--pinentry-mode"
-      - "loopback"
-      - "--passphrase={{ .Env.GPG_PASSPHRASE }}"
-      - "--armor"
-      - "--detach-sign"
-      - "--output"
-      - "${signature}"
-      - "${artifact}"
+signs: []   # <-- IMPORTANT: disables signatures = no SHASUMS sig warning
 
 release:
   github:
     owner: BelianBooker
     name: terraform-provider-aws
+    draft: false
+    prerelease: false
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

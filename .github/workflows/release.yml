@@ -1,36 +1,26 @@
-name: release
+name: Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
+
+permissions:
+  contents: write
 
 jobs:
-  goreleaser:
+  release:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
-      id-token: write
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-     
-      - name: Clean dist
-        run: rm -rf dist
-
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # REQUIRED for GoReleaser "shallow clone" issue
 
       - name: Setup Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
-
-      - name: Import GPG private key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          go-version: "1.22"
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
@@ -39,4 +29,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
