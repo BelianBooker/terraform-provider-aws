@@ -37,7 +37,6 @@ signs:
     args:
       - --batch
       - --yes
-      - --armor
       - --pinentry-mode=loopback
       - --passphrase=${GPG_PASSPHRASE}
       - --local-user=${GPG_KEY_ID}
