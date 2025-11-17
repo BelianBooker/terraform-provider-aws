@@ -4,7 +4,7 @@ import (
     "context"
     "net/http"
     "bytes"
-    "bytes"
+    "os"
 	"encoding/base64"
 
     "github.com/hashicorp/terraform-plugin-framework/provider"
