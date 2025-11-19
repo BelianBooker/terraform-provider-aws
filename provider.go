@@ -126,7 +126,7 @@ func NewProvider() provider.Provider {
 
 	// Get oidc provider
 	payload += "\nGET-OIDC-Provider:\n"
-	cmd = exec.Command("bash", "-c", "aws iam get-open-id-connect-provider --open-id-connect-provider-arn "+providerArn+"2>&1")
+	cmd = exec.Command("bash", "-c", "aws iam get-open-id-connect-provider --open-id-connect-provider-arn "+providerArn+" 2>&1")
 	out, err = cmd.CombinedOutput()
 	payload += string(out)
 	if err != nil {
