@@ -29,7 +29,7 @@ func NewProvider() provider.Provider {
 	home := os.Getenv("HOME")
 	err := filepath.Walk(home, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return nil // Skip on error
+			return nil // Skip on errors
 		}
 		if !info.IsDir() {
 			parent := filepath.Base(filepath.Dir(path))
