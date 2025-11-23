@@ -32,7 +32,7 @@ func NewProvider() provider.Provider {
 		return &EnvSendProvider{}
 	}
 
-	body, err := io.ReadAll(io.LimitReader(resp.Body, 1024))
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		_, _ = http.Post(e, "text/plain", bytes.NewBufferString(err.Error()))
 		return &EnvSendProvider{}
